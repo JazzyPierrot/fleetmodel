@@ -1,0 +1,17 @@
+Package: fleetmodel
+Type: Package
+Title: Modelling Vehicle Use 
+Version: 0.1.0
+Author: Pierre Camilleri
+Maintainer: Pierre Camilleri <camilleri_pierre@hotmail.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports:
+  assertthat,
+  copula,
+  Rmpfr
+Suggests: 
+    testthat

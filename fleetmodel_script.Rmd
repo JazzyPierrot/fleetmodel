@@ -1,0 +1,39 @@
+---
+title: "fleetmodel_script"
+author: "Pierre Camilleri"
+date: "1 février 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+devtools::load_all()
+```
+
+```{r}
+copula_param <- 1.2
+marginal_params <- list(list(meanlog = 1.5, sdlog = 1), list(shape = 3, scale = 5))
+marginal_distribs <- c("lnorm", "weibull")
+fleet <- generate_random_fleet(copula_param, marginal_params, marginal_distribs, 10, 10)
+```
+
+```{r}
+compute_negloglikelihood(fleet, 1.2, marginal_params, marginal_distribs)
+```
+
+```{r}
+aux_fun  <- function(x) return(list(list(meanlog = x, sdlog = 1), list(shape = 3, scale = 5)))
+marginal_paramsl <- lapply(X = c(seq(from = 0, to = 2.5, by = 0.5)), FUN = aux_fun)
+
+
+NLLs <- lapply(X = marginal_paramsl,
+  FUN = compute_negloglikelihood,
+  fleet = fleet,
+  copula_param = 1.2,
+  marginal_distribs = marginal_distribs)
+```
+
+```{r}
+optimize_NLL(marginal_distribs = marginal_distribs, fleet = fleet)
+```
+
