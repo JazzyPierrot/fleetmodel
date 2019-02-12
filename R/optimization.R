@@ -30,6 +30,16 @@ aux_fun_to_optimize <- function(x, marginal_distribs, fleet){
 }
 
 
+#' Optimize the neg-loglikelihood of the model for a given fleet
+#'
+#' @param marginal_distribs Marginal distribution of the model to optimize.
+#'   Vector of length 2.
+#' @param fleet Fleet to optimize on (List of vectors)
+#'
+#' @return
+#' @export
+#'
+#' @examples
 optimize_NLL <- function(marginal_distribs, fleet){
 
   res  <- optim(
