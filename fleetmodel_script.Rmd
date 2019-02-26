@@ -20,8 +20,11 @@ cat("Individual 4 Daily Vehicle Kilometers Traveled are : \n", fleet[[4]])
 
 ```{r}
 cat("The negative log-likelihood of the fleet with parameters of the model it is generated from is: \n",
-compute_negloglikelihood(fleet, 1.2, marginal_params, marginal_distribs)
+compute_negloglikelihood(fleet, 1.2, marginal_params, marginal_distribs, use_mpfr = TRUE)
 )
+# With mpfr 128 bits: 15.17 sec elapsed 
+# With mpfr 256 bits: 16.171 sec elapsed (X43 as much time)
+# Without mpfr: 0.379 sec elapsed 
 ```
 
 ```{r}

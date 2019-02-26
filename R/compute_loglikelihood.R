@@ -15,7 +15,8 @@ compute_negloglikelihood <- function(
   copula_param,
   marginal_params,
   marginal_distribs,
-  n_montecarlo = 1000){
+  n_montecarlo = 1000,
+  use_mpfr = TRUE){
 
   check_params_and_distribs(marginal_params, marginal_distribs)
 
@@ -45,10 +46,23 @@ compute_negloglikelihood <- function(
   # Each column represents one Monte-Carlo simulation
   # M_i,j represents the above product
 
+  #mpfr_dweibull <- function(x, shape, scale){
+  #  if (x < 0) return(0)
+  #  return(
+  #    shape / scale *
+  #      exp(
+  #        (shape - 1)*log(x / scale) -
+  #          (x / scale)^shape
+  #      )
+  #  )
+  #}
+
   # Below auxiliary function computes one simulation for one agent
   aux_one_agent <- function(DVKT_vec, shape_n_scale){
     vec <- sapply(X = DVKT_vec,  dweibull, shape = shape_n_scale[1], scale = shape_n_scale[2])
-    # Here transfom to Rmpfr
+    if (use_mpfr) {
+      vec <- Rmpfr::mpfr(vec, precBits = 128)
+    }
     return(prod(vec))
   }
 
@@ -61,19 +75,25 @@ compute_negloglikelihood <- function(
     fun_params[[1]], # list of DVKT_vec
     fun_params[[2]]) # list of shape_n_scale
 
-  # Reconstitute matrix
-  ILL <- matrix(ILL,
-                nrow = length(fleet),
-                ncol = n_montecarlo,
-                byrow = FALSE)
 
+  # Reconstitute matrix
+  if (use_mpfr) {
+    ILL <- Rmpfr::mpfr2array(
+      ILL,
+      dim = c( length(fleet), n_montecarlo)
+    )
+  } else {
+    ILL <- matrix(ILL,
+                  nrow = length(fleet),
+                  ncol = n_montecarlo,
+                  byrow = FALSE)
+  }
   # Monte-Carlo estimation of double integral
-  double_int <- rowSums(ILL) / n_montecarlo
+  double_int <- Matrix::rowSums(ILL) / n_montecarlo
 
   # NLL
+  NLL <- -sum(log(double_int))
 
-  NLL <- - sum(log(double_int))
-
-  return(NLL)
+  return(as.numeric(NLL))
 
 }
