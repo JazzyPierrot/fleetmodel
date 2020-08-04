@@ -15,7 +15,7 @@ test_that("Random fleet works as expected", {
   )
   expect_equal(
     fleet,
-    data.frame(ind = as.character(rep(1, 2)), ddd = rep(6, 2), stringsAsFactors = FALSE)
+    data.frame(ind = as.character(rep(1, 2)), dvkt = rep(6, 2), stringsAsFactors = FALSE)
   )
 })
 

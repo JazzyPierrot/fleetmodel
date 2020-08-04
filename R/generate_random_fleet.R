@@ -45,7 +45,7 @@ generate_random_fleet <- function(
   fleet <- purrr::map2_dfr(
     .x = k,
     .y = lambda,
-    .f = ~ data.frame(ddd = round(rweibull(shape = .x, scale = .y, n = n_obs))),
+    .f = ~ data.frame(dvkt = round(rweibull(shape = .x, scale = .y, n = n_obs))),
     .id = "ind"
   )
 

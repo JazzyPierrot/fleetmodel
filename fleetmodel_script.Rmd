@@ -15,47 +15,6 @@ copula_param <- 1.2
 marginal_params <- list(list(meanlog = 1.5, sdlog = 1), list(shape = 3, scale = 5))
 marginal_distribs <- c("lnorm", "weibull")
 fleet <- generate_random_fleet(copula_param, marginal_params, marginal_distribs, 10, 10)
-cat("Individual 4 Daily Vehicle Kilometers Traveled are : \n", fleet[[4]])
-```
-
-```{r}
-cat("The negative log-likelihood of the fleet with parameters of the model it is generated from is: \n",
-compute_negloglikelihood(fleet, 1.2, marginal_params, marginal_distribs, use_mpfr = TRUE)
-)
-# With mpfr 128 bits: 15.17 sec elapsed 
-# With mpfr 256 bits: 16.171 sec elapsed (X43 as much time)
-# Without mpfr: 0.379 sec elapsed 
-```
-
-```{r}
-variations <- seq(from = 0, to = 2.5, by = 0.5)
-aux_fun  <- function(x) return(list(list(meanlog = x, sdlog = 1), list(shape = 3, scale = 5)))
-marginal_paramsl <- lapply(X = variations, FUN = aux_fun)
-
-
-NLLs <- lapply(X = marginal_paramsl,
-  FUN = compute_negloglikelihood,
-  fleet = fleet,
-  copula_param = 1.2,
-  marginal_distribs = marginal_distribs)
-
-cat("NaNs may be produced as current log-likelihood function does not handle well small numbers")
-plot(variations, NLLs, xlab = "meanlog parameter of first marginal distribution", ylab = "Negative log likelihood")
-points(1.5, NLLs[[4]], pch = 4)
-```
-
-```{r}
-# Parameter estimation
-res <- optimize_NLL(marginal_distribs = marginal_distribs, fleet = fleet)
-```
-
-```{r}
-aux_names <- c("copula_param", "meanlog", "sdlog", "shape", "scale")
-res_df <- data.frame(param_names = factor(x = aux_names, levels = aux_names)
-  , params = c(1.2, 1.5, 1, 3, 5, res$par), origin = c(rep("initial", 5), rep("estimated", 5)))
-
-ggplot2::ggplot(res_df, ggplot2::aes(x = param_names , y = params, color = origin)) +
-  ggplot2::geom_point()
-
+cat("Individual 4 Daily Vehicle Kilometers Traveled are : \n", fleet[4])
 ```
 
