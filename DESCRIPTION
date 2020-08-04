@@ -1,6 +1,6 @@
 Package: fleetmodel
 Type: Package
-Title: Modelling Vehicle Use 
+Title: Modelling Vehicle Use
 Version: 0.1.0
 Author: Pierre Camilleri
 Maintainer: Pierre Camilleri <camilleri_pierre@hotmail.com>
@@ -12,6 +12,7 @@ LazyData: true
 Imports:
   assertthat,
   copula,
+  purrr,
   Rmpfr
-Suggests: 
-    testthat
+Suggests:
+  testthat

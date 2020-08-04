@@ -18,7 +18,15 @@
 #' marginal_distribs <- c("lnorm", "weibull")
 #' generate_random_fleet(copula_param, marginal_params, marginal_distribs, 100)
 #'
-generate_random_fleet <- function(copula_param, marginal_params, marginal_distribs, n_agents, n_obs, seed = 123){
+generate_random_fleet <- function(
+  copula_param,
+  marginal_params,
+  marginal_distribs,
+  n_agents,
+  n_obs,
+  seed = 123
+) {
+
   set.seed(seed)
 
   check_params_and_distribs(marginal_params, marginal_distribs)
@@ -30,15 +38,16 @@ generate_random_fleet <- function(copula_param, marginal_params, marginal_distri
     n_agents
   )
 
-  assertthat::assert_that(all(p[,1] > 0))
-  lambda <- p[,2] / gamma(1 + 1/p[,1])  #scale
-  k <- p[,1]      #shape
+  assertthat::assert_that(all(p[, 1] > 0))
+  lambda <- p[, 2] / gamma(1 + 1 / p[, 1]) #scale
+  k <- p[, 1] #shape
 
-  fleet <- mapply(rweibull,
-                  shape = k,
-                  scale = lambda,
-                  MoreArgs = list(n = n_obs),
-                  SIMPLIFY = FALSE)
+  fleet <- purrr::map2_dfr(
+    .x = k,
+    .y = lambda,
+    .f = ~ data.frame(ddd = round(rweibull(shape = .x, scale = .y, n = n_obs))),
+    .id = "ind"
+  )
 
   return(fleet)
 }
