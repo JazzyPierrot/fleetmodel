@@ -6,15 +6,66 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(rstan)
+library(shinystan)
+library(dplyr)
 knitr::opts_chunk$set(echo = TRUE)
 devtools::load_all()
+options(mc.cores = parallel::detectCores())
+rstan_options(auto_write = TRUE)
 ```
 
 ```{r}
-copula_param <- 1.2
-marginal_params <- list(list(meanlog = 1.5, sdlog = 1), list(shape = 3, scale = 5))
-marginal_distribs <- c("lnorm", "weibull")
-fleet <- generate_random_fleet(copula_param, marginal_params, marginal_distribs, 10, 10)
-cat("Individual 4 Daily Vehicle Kilometers Traveled are : \n", fleet[4])
+copula_param <- 0
+marginal_params <- list(list(shape = 2, scale = 3), list(shape = 1.5, scale = 100))
+marginal_distribs <- c("weibull", "weibull")
+n_ind <- 100
+n_obs <- 10
+fleet <- generate_random_fleet(copula_param, marginal_params, marginal_distribs, n_ind, n_obs)
+cat(
+  "Individual 4 Daily Vehicle Kilometers Traveled are : \n",
+  fleet[fleet$ind == "4", "dvkt"],
+  "\n"
+)
 ```
 
+```{r stan_data}
+dat <- list(
+  N = nrow(fleet),
+  M = dplyr::n_distinct(fleet$ind),
+  d = fleet$dvkt,
+  ind = as.integer(fleet$ind)
+  )
+
+fit <- rstan::stan(
+  "./R/model.stan",
+  data = dat,
+  chains = 3
+  # control = list(max_treedepth = 15),
+  # iter = 8000
+)
+
+# lambda_shape is for exponential, while lambda was defined for weibull as 1/lambda_shape = 3. So expected value is 0.33
+# fitted k_scale = 0.21
+# fitted lambda_scale = 2.61
+# VS 1, 100 ? strange
+```
+
+```{r plots}
+# Observed vs computed average value
+library(dplyr)
+library(ggplot2)
+params <- extract(fit, pars = c("lambda_shape", "lambda_scale", "k_shape", "k_scale"))
+means <- fleet %>% group_by(ind) %>% summarize(mdvkt = mean(dvkt))
+
+n_rep <- 100
+alpha <- 0.5
+yrep <- purrr::map2_dfr(
+  params[["lambda_shape"]][1:n_rep],
+  params[["lambda_scale"]][1:n_rep],
+  ~ data.frame(t(rweibull(n_ind, shape = .x, scale = .y)))
+) %>%
+  as.matrix()
+
+bayesplot::ppc_dens_overlay(y = means$mdvkt, yrep = yrep)
+```

@@ -39,7 +39,8 @@ generate_rdm_distribution_p <- function(
   copula_param,
   marginal_params,
   marginal_distribs,
-  n){
+  n
+){
 
   set.seed(12345)
   clayton_cop <- copula::claytonCopula(param = copula_param, dim = 2)
@@ -53,7 +54,6 @@ generate_rdm_distribution_p <- function(
   p <- copula::rMvdc(n, multivariate_dist)
 
   return(p)
-
 }
 
 #' Get the parameter names of a given distribution

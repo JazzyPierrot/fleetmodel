@@ -39,14 +39,25 @@ generate_random_fleet <- function(
   )
 
   assertthat::assert_that(all(p[, 1] > 0))
-  lambda <- p[, 2] / gamma(1 + 1 / p[, 1]) #scale
-  k <- p[, 1] #shape
+  k <- 1 + p[, 1] # shape is > 1
+  lambda <- p[, 2] / gamma(1 + 1 / k) # scale
+
+  params <- data.frame(
+    ind = as.character(1:n_agents),
+    k = k,
+    lambda = lambda
+  )
 
   fleet <- purrr::map2_dfr(
     .x = k,
     .y = lambda,
-    .f = ~ data.frame(dvkt = round(rweibull(shape = .x, scale = .y, n = n_obs))),
+    .f = ~ data.frame(dvkt = ceiling(rweibull(shape = .x, scale = .y, n = n_obs))),
     .id = "ind"
+  )
+
+  fleet <- dplyr::left_join(
+    fleet,
+    params
   )
 
   return(fleet)
